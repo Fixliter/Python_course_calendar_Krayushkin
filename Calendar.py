@@ -118,6 +118,7 @@ class Calendar:
         for event_d in self.events_to_db:
             if event_d["_id"] == del_event:
                 self.events_to_db.remove(event_d)
+        return del_event
 
 
 
@@ -189,6 +190,9 @@ class Calendar:
         self._calendar_dict_db["events"] = self._id_events
 
         return self._calendar_dict_db
+
+    def get_id_events(self):
+        return self._id_events
 
     def accept_event_and_message(self):
         """Принятие события участником"""

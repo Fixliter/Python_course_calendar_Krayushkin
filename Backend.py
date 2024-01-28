@@ -117,7 +117,7 @@ class Backend(metaclass=SingletonMeta):
         # self.__class__.get_users_from_db()
         self.launched_user = ''
         self.current_user = current_user
-        self.session_launched = ""
+        self.calendar_current = None
         self.show_status("1")
 
     @staticmethod
@@ -581,11 +581,23 @@ class Backend(metaclass=SingletonMeta):
     def find_user_by_login(self, login):
         return self.connection_db_users().find_one({"login": login})
 
-    def find_users_by_id(self):
+    def find_users_by_id(self, user_id):
+        return self.connection_db_users().find_one({"_id": user_id})
+
+    def find_users_by_ident(self, ident):
+        return self.connection_db_users().find_one({"identificator": ident})
+
+    def find_calendar_by_id(self, calendar_id):
+        return self.connection_db_calendars().find_one({"_id": calendar_id})
+
+    def find_event_by_id(self, event_id):
+        return self.connection_db_events().find_one({"_id": event_id})
+
+    def find_event_by_time(self, start_search_time, end_search_time):
         pass
 
-    def find_users_by_ident(self):
-        pass
+        # collection = self.connection_db_events()
+
 
     @staticmethod
     def check_pass_user(login, entered_password: str):
@@ -638,7 +650,7 @@ class Backend(metaclass=SingletonMeta):
                 Backend.show_status("5")
         self.choose_calendar(self.current_user.login)
 
-    def choose_calendar(self, user_login):
+    def choose_calendar(self, user_login=None):
         """Выбор календаря для текущей работы"""
         Backend.show_status("6")
         # print(self.connection_db_users().find_one({"login": user_login}, {"id": 0, "calendars": 1}))
@@ -649,13 +661,27 @@ class Backend(metaclass=SingletonMeta):
         # print(calendar_open_id, type(calendar_open_id))
         # print(self.current_user.get_identificator())
 
-        calendar_current = Calendar(self.current_user.get_identificator(),
-                                    calendar_open["name"],
-                                    _id=calendar_open_id,
-                                    _events=calendar_open["events"])
+        self.calendar_current = Calendar(self.current_user.get_identificator(),
+                                         calendar_open["name"],
+                                         _id=calendar_open_id,
+                                         _events=calendar_open["events"])
         Backend.show_status("7")
-        calendar_current.start_calendar()
-        return calendar_current
+        self.calendar_current.start_calendar()
+        return self.calendar_current
+
+    def del_event_as_owner(self):
+        event_to_del = self.calendar_current.del_event()
+        collection_events = self.connection_db_events()
+        collection_events.delete_one({"_id": event_to_del})
+        collection_calendars = self.connection_db_events()
+        collection_calendars.update({"_id": self.calendar_current.get_id()},
+                                    {"$set": {"events": self.calendar_current.get_id_events()}})
+
+    def del_event_as_participant(self):
+        event_to_del = self.calendar_current.del_event()
+        collection_calendars = self.connection_db_events()
+        collection_calendars.update({"_id": self.calendar_current.get_id()},
+                                    {"$set": {"events": self.calendar_current.get_id_events()}})
 
     def close_session(self):
         Backend.show_status("32")

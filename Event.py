@@ -175,6 +175,7 @@ class Event:
         self._event_dict['descr'] = self.description
         self._event_dict['members'] = self.members
 
+
         return self._event_dict
 
     def create_from_json_message(self, json_message):
