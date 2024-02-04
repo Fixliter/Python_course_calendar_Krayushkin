@@ -145,14 +145,14 @@ class Event:
 
     def set_periodic(self):
 
-        periodic = input(f'Выберите периодичность события:\n'
-                         f'"1" - Ежегодно\n'
-                         f'"2" - Ежемесячно\n'
-                         f'"3" - Еженедельно\n'
-                         f'"4" - Ежедневно\n'
-                         f'"5" - Разовое\n'
-                         f'Ваш выбор: ')
-        while periodic not in (1, 2, 3, 4, 5, 0):
+        periodic = str(input(f'Выберите периодичность события:\n'
+                             f'"1" - Ежегодно\n'
+                             f'"2" - Ежемесячно\n'
+                             f'"3" - Еженедельно\n'
+                             f'"4" - Ежедневно\n'
+                             f'"5" - Разовое\n'
+                             f'Ваш выбор: '))
+        while periodic not in "1, 2, 3, 4, 5, 0":
             periodic = input(f'Вы ввели неверный номер периодичности, повторите набор, либо наберите "0" для выхода:\n'
                              f'"1" - Ежегодно\n'
                              f'"2" - Ежемесячно\n'
@@ -175,7 +175,6 @@ class Event:
         self._event_dict['descr'] = self.description
         self._event_dict['members'] = self.members
 
-
         return self._event_dict
 
     def create_from_json_message(self, json_message):
@@ -197,7 +196,7 @@ class Event:
         _h, _min = str(_t).split(sep=":")
         end = dt.datetime(year=int(_y), month=int(_m), day=int(_d), hour=int(_h), minute=int(_min))
         self._end_time = end
-        if self.check_sequence_dates(self._start_time, self._end_time):
+        if not self.check_sequence_dates(self._start_time, self._end_time):
             raise ValueError(f'В {json_message} сообщении дата начала события позже окончания')
         self._duration = data_json["duration"]
         self._description = data_json["descr"]
@@ -227,7 +226,7 @@ class Event:
             _h, _min = str(_t).split(sep=":")
             end = dt.datetime(year=int(_y), month=int(_m), day=int(_d), hour=int(_h), minute=int(_min))
             self._end_time = end
-            if self.check_sequence_dates(self._start_time, self._end_time):
+            if not self.check_sequence_dates(self._start_time, self._end_time):
                 raise ValueError(f'В {json_path} файле дата начала события позже окончания')
             self._duration = data_json["duration"]
             self._description = data_json["descr"]
