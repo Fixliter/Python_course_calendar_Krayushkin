@@ -233,38 +233,65 @@ class Calendar:
                 found_events.append(event)
                 event_count += 1
             # if event["periodic"] == "Еженедельно" and
-            if (
-                    (event["periodic"] == "Еженедельно") and
-                    (t2time.date() >= event["start_time"].date() and
-                            (  (t1time.year < event["start_time"].year) or
-                               (t1time.year >= event["start_time"].year) and
-                               (
-                                       (t1time.isocalendar().week < event["start_time"].isocalendar().week <= t2time.isocalendar().week) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isocalendar().week < t2time.isocalendar().week and t2time.isoweekday() < event["start_time"].isoweekday() and t1time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() >= event["start_time"].time()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time - t1time >= datetime.timedelta(days=7)) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() > t1time.isoweekday()) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() >= event["start_time"].isoweekday() > t1time.isoweekday() and t2time.time() >= event["start_time"].time()) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() >= t1time.isoweekday() and t1time.time() <= event["start_time"].time()) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isoweekday() == event["start_time"].isoweekday() and t1time.time() <= event["start_time"].time())
-                               )
-                            ) and
-                            (  #(t2time.year > event["start_time"].year) or
-                               (
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isocalendar().week < t2time.isocalendar().week and t2time.isoweekday() < event["start_time"].isoweekday() and t1time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isoweekday() == event["start_time"].isoweekday() and t1time.time() <= event["start_time"].time() and t2time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() >= event["start_time"].time() and t2time.isoweekday() < event["start_time"].isoweekday()) or
-                                       (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time - t1time >= datetime.timedelta(days=7)) or
-                                       (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() > t1time.isoweekday()) or
-                                       (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() >= event["start_time"].isoweekday() > t1time.isoweekday() and t2time.time() >= event["start_time"].time()) or
-                                       (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() >= t1time.isoweekday() and t1time.time() <= event["start_time"].time()) or
-                                       (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() > event["start_time"].time())
-                               )
-                            )
-                    )
-            ):
-                found_events.append(event)
-                event_count += 1
+            # if (
+            #         (event["periodic"] == "Еженедельно") and
+            #         (t2time.date() >= event["start_time"].date() and
+            #                 (  (t1time.year < event["start_time"].year) or
+            #                    (t1time.year >= event["start_time"].year) and
+            #                    (
+            #                            (t1time.isocalendar().week < event["start_time"].isocalendar().week <= t2time.isocalendar().week) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isocalendar().week < t2time.isocalendar().week and t2time.isoweekday() < event["start_time"].isoweekday() and t1time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() >= event["start_time"].time()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time - t1time >= datetime.timedelta(days=7)) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() > t1time.isoweekday()) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() >= event["start_time"].isoweekday() > t1time.isoweekday() and t2time.time() >= event["start_time"].time()) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() >= t1time.isoweekday() and t1time.time() <= event["start_time"].time()) or  #t1time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isoweekday() == event["start_time"].isoweekday() and t1time.time() <= event["start_time"].time())
+            #                    )
+            #                 ) and
+            #                 (  #(t2time.year > event["start_time"].year) or
+            #                    (
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isocalendar().week < t2time.isocalendar().week and t2time.isoweekday() < event["start_time"].isoweekday() and t1time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t1time.isoweekday() == event["start_time"].isoweekday() and t1time.time() <= event["start_time"].time() and t2time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t1time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() >= event["start_time"].time() and t2time.isoweekday() < event["start_time"].isoweekday()) or
+            #                            (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time - t1time >= datetime.timedelta(days=7)) or
+            #                            (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() > t1time.isoweekday()) or
+            #                            (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() >= event["start_time"].isoweekday() > t1time.isoweekday() and t2time.time() >= event["start_time"].time()) or
+            #                            (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() > event["start_time"].isoweekday() >= t1time.isoweekday() and t1time.time() <= event["start_time"].time()) or
+            #                            (t2time.isocalendar().week >= event["start_time"].isocalendar().week and t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() > event["start_time"].time())
+            #                    )
+            #                 )
+            #         )
+            # ):
+            #     found_events.append(event)
+            #     event_count += 1
+            if event["periodic"] == "Еженедельно":
+                if t1time.year >= event["start_time"].year and t2time.year >= event["start_time"].year and t2time >= event["start_time"]:
+                    if event["start_time"] > t1time:
+                        found_events.append(event)
+                    elif t1time.date == event["start_time"].date and t1time.time() <= event["start_time"].time():
+                        found_events.append(event)
+                    elif t2time.date == event["start_time"].date and t2time.time() >= event["start_time"].time():
+                        found_events.append(event)
+                    elif t2time.isoweekday() == event["start_time"].isoweekday() and t2time.time() >= event["start_time"].time():
+                        found_events.append(event)
+                    elif t2time - t1time >= timedelta(days=7):
+                        found_events.append(event)
+                    elif t2time - t1time < timedelta(days=7):
+                        ts2 = t2time
+                        check = 0
+                        while t1time.date() != ts2.date():
+                            ts2 = ts2 - timedelta(days=1)
+                            if ts2.isoweekday() == event["start_time"].isoweekday():
+                                check = 1
+                                continue
+                        if check == 1:
+                            found_events.append(event)
+                if t1time.year < event["start_time"].year <= t2time.year:
+                    if t2time > event["start_time"]:
+                        found_events.append(event)
+                    if t2time.date == event["start_time"].date and t2time >= event["start_time"]:
+                        found_events.append(event)
             # if (
             #         (event["periodic"] == "Ежемесячно") and
             #         (t2time.date() >= event["start_time"].date() and
@@ -348,7 +375,7 @@ class Calendar:
         # ttt = dt.datetime.strptime("2024/10/12, 00:00", '%Y/%m/%d, %H:%M')
         # print(ts2)
         # print(ttt)
-        # while t1time.date != ts2.date:
+        # while t1time.date() != ts2.date():
         #     ts2 = ts2 - timedelta(days=1)
         #     # print(ts2)
         #     if ts2.isoweekday() == ttt.isoweekday():
@@ -397,8 +424,8 @@ if __name__ == '__main__':
         "title": "Meeting 1234",
         "periodic": "Ежедневно",
         "organizer": "Bobby",
-        "start_time": "2024/03/18, 01:50",
-        "end_time": "2024/03/18, 02:59",
+        "start_time": "2025/01/05, 01:50",
+        "end_time": "2025/01/05, 02:59",
         "duration": "1:09:00",
         "descr": "Let's do it quickly",
         "members": ["@triko", "@gangsta", "@rooney"]
@@ -453,7 +480,7 @@ if __name__ == '__main__':
     print(g.get_events_dict_self(), "self._events_d")
     print(g.events_to_db)
     print(g.get_week_of_month("2024/03/04, 00:00"))
-    print(g.find_events_by_date(t1="2024/10/13, 00:00", t2="2025/10/11, 20:59"))
+    print(g.find_events_by_date(t1="2025/01/01, 00:00", t2="2025/01/06, 20:59"))
 
     #
     # f = Calendar("Vika", "Work")
