@@ -38,6 +38,7 @@ class User:
         self._user_calendars = dict()
         self._user_calendars_list = list()
         self.id_calendars = []
+        self.opened_calendar = None
 
     @property
     def name(self):
@@ -267,6 +268,7 @@ class User:
         # new_user.save_as_json_file()
         self.id_calendars.append(new_calendar.get_id())  # ====================================
         self.calendars_db.append(new_calendar.to_dict_db())  # ====================================
+        self._user_calendars_list.append(new_calendar.to_dict_db())
         for user in self.__class__.users_db:
             if user["_id"] == self._user_id:
                 user["calendars"].append(new_calendar.get_id())
@@ -283,6 +285,7 @@ class User:
         self._user_calendars[new_calendar.get_id()] = new_calendar
         self.id_calendars.append(new_calendar._id)  # ==================================
         self.calendars_db.append(new_calendar.to_dict_db())
+        self._user_calendars_list.append(new_calendar.to_dict_db())
         # print(self.__class__._calendars)  # - закомментировать после отладки
         # new_user.save_as_json_file()
         for user in self.__class__.users_db:
@@ -299,9 +302,73 @@ class User:
         """Возвращает календари класса User"""
         return User._calendars
 
-    def find_calendar_by_owner(self):
+    def find_calendar_by_owner(self, owner):
         """Находит календари по владельцу"""
-        pass
+        found_calendars = []
+        for calendar in self._user_calendars_list:
+            if calendar['owner'] == owner:
+                found_calendars.append(calendar)
+        print(found_calendars)
+        return found_calendars
+
+    def m_find_calendar_by_owner(self, owner):
+        """Находит календари по владельцу"""
+        found_calendars = []
+        for calendar in self._user_calendars.values():
+            if calendar.get_owner() == owner:
+                found_calendars.append(calendar)
+        print(found_calendars)
+        return found_calendars
+
+    def find_calendar_by_id(self, id_calendar):
+        """Находит календари по id"""
+
+        for calendar in self._user_calendars_list:
+            if int(calendar['_id']) == int(id_calendar):
+                print(calendar)
+                return calendar
+
+    def m_find_calendar_by_id(self, id_calendar):
+        """Находит календари по id"""
+
+        for calendar in self._user_calendars.values():
+            if calendar.get_id() == int(id_calendar):
+                return calendar
+
+    def open_calendar(self):
+        """Распаковывает календарь для дальнейшей работы"""
+        calendars = self.find_calendar_by_owner(self.login)
+        # select = input(f"Выберите id календаря для дальнейших действий: ")
+        selected_calendar = None
+        select = 0
+        while selected_calendar is None:
+            select = input(f"Выберите id календаря для дальнейших действий или нажмите '0' для выхода: ")
+            if int(select) == 0:
+                return
+            selected_calendar = self.find_calendar_by_id(select)
+        self.opened_calendar = Calendar(name=selected_calendar['name'],
+                                        owner=selected_calendar['owner'],
+                                        _id=selected_calendar['_id'],
+                                        _events=selected_calendar['events'])
+        return self.opened_calendar
+
+    def m_open_calendar(self):
+        """Распаковывает календарь для дальнейшей работы"""
+        calendars = self.m_find_calendar_by_owner(self.login)
+        # select = input(f"Выберите id календаря для дальнейших действий: ")
+        selected_calendar = None
+        select = 0
+        while selected_calendar is None:
+            select = input(f"Выберите id календаря для дальнейших действий или нажмите '0' для выхода: ")
+            if int(select) == 0:
+                return
+            selected_calendar = self.m_find_calendar_by_id(select)
+            print(selected_calendar)
+        self.opened_calendar = Calendar(name=selected_calendar.name,
+                                        owner=selected_calendar.get_owner(),
+                                        _id=selected_calendar.get_id(),
+                                        _events=selected_calendar.get_events_dict_self())
+        return self.opened_calendar
 
     def update_user(self):
         """Подключается к БД и обновляет user в базе данных"""
@@ -313,10 +380,6 @@ class User:
 
         except ConnectionError:
             print(f'Соединение с БД не достигнуто')
-
-    def find_calendar_by_id(self):
-        """Находит календари по id"""
-        pass
 
 
 if __name__ == '__main__':
@@ -381,6 +444,13 @@ if __name__ == '__main__':
     print(User.users_db)
     print(first_user.id_calendars)
     print(first_user.calendars_db)
+    # print(first_user._user_calendars_list)
+    # first_user.find_calendar_by_id(2)
+    # first_user.find_calendar_by_owner('Batman')
+    # first_user.m_find_calendar_by_owner('Batman')
+    # print(first_user.open_calendar())
+    print(first_user.m_open_calendar())
+    # print(first_user.m_find_calendar_by_id(2))
 
     # ====================================================
     # first_user.check_auth()

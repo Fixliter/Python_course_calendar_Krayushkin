@@ -277,6 +277,7 @@ class Backend(metaclass=SingletonMeta):
         collection.insert_one(self.__class__._users[new_user.login])
 
         Backend.show_status("31")
+        return [new_user.login, new_user._password]
 
     def read_user_from_class(self, user):
         """При подключении к User создает словарь с user"""
@@ -650,6 +651,12 @@ class Backend(metaclass=SingletonMeta):
                 Backend.show_status("5")
         self.choose_calendar(self.current_user.login)
 
+    def open_calendar(self):
+        return self.current_user.m_open_calendar()
+
+    def create_calendar(self):
+        return self.current_user.create_calendar()
+
     def choose_calendar(self, user_login=None):
         """Выбор календаря для текущей работы"""
         Backend.show_status("6")
@@ -941,7 +948,7 @@ if __name__ == '__main__':
     # Back.set_index_db()
 
     # print(Back.asyncconnect_db())
-    print(Back._users_list)
+    # print(Back._users_list)
     # print(Back.users_db)
 
     # Проверка загрузки данных
@@ -961,4 +968,4 @@ if __name__ == '__main__':
     # Back.update_user(_id=2, new_login="KurlaKu")
 
     # Back.find_user_by_login("Dona")
-    Back.connection_db_check()
+    # Back.connection_db_check()

@@ -27,13 +27,22 @@ class Calendar:
     def __init__(self, owner, name, _id=None, _events=None):
         self._owner = owner
         self._name = name
-        self.__class__.__id += 1
-        self.__class__._id_list.append(self.__class__.__id)
-        self.__id = self.__class__.__id
+        if _id is None:
+            self.__class__.__id += 1
+            self.__class__._id_list.append(self.__class__.__id)
+            self.__id = self.__class__.__id
+        else:
+            self.__id = _id
         self._calendar_dict = dict()
         self._calendar_dict_db = dict()
         self._events = []
         self._events_d = dict()
+        if _events is not None:
+            self._events_d = _events
+            for event in _events:
+                self._events.append(event)
+
+
         self.to_dict()
         self.__class__._calendars_dict[self.__id] = self
         self._id_events = []
@@ -60,8 +69,21 @@ class Calendar:
         match self.stage:
             case "1":
                 self.add_event()
+
             case "2":
                 self.del_event()
+
+            case "3":
+                sel = int(input(f'Выберите способ поиска/выбора события:\n'
+                      f'"1" - Поиск по ID'))
+                if sel == 1:
+                    change_event = self.find_events_by_id(input(f'Введите ID события): '))
+
+            case "4":
+                self.find_events_by_date(input(f'ВВедите дату начала поиска в формате "YYYY/MM/DD, hh:mm": '), input(f'ВВедите конечную дату поиска в формате "YYYY/MM/DD, hh:mm": )'))
+
+            case "5":
+                self.find_events_by_title(input(f'ВВедите название события: '))
 
     def get_owner(self):
         """Возвращает владельца календаря"""
@@ -204,7 +226,7 @@ class Calendar:
         pass
 
     def find_events_by_date(self, t1: str, t2: str):
-        """Поиск события по дате"""
+        """Поиск события по дате с учетом периодичности событий"""
         found_events = list()
         t1time = dt.datetime.strptime(t1, '%Y/%m/%d, %H:%M')
         t2time = dt.datetime.strptime(t2, '%Y/%m/%d, %H:%M')
@@ -318,6 +340,7 @@ class Calendar:
 
     @staticmethod
     def get_week_of_month(date):
+        """Получение номера недели месяца для переданной даты"""
         calendar.setfirstweekday(0)
         print(type(date))
         if isinstance(date, str):
@@ -334,13 +357,23 @@ class Calendar:
         week_of_month = np.where(x == day)[0][0] + 1
         return week_of_month
 
-    def find_events_by_title(self):
+    def find_events_by_title(self, name):
         """Поиск события по наименованию"""
-        pass
+        found_events = list()
+        for event in self.events_to_db:
+            if event["title"] == str(name):
+                found_events.append(event)
+        print(found_events)
+        return found_events
 
-    def find_events_by_id(self):
+    def find_events_by_id(self, event_id):
         """Поиск события по id"""
-        pass
+        found_events = list()
+        for event in self.events_to_db:
+            if str(event["_id"]) == str(event_id):
+                found_events.append(event)
+        print(found_events)
+        return found_events
 
 
 if __name__ == '__main__':
