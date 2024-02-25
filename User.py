@@ -10,8 +10,8 @@ from Calendar import Calendar
 
 class User:
     __identificators = []
-    __id = 0
-    __id_list = []
+
+    _id_list = [0]
     __hash_and_salts = []
     fieldnames_user = ['_id', 'name', 'login', 'identificator', 'job_title', 'password', 'email', 'calendars']
     file_users = "users_data.csv"
@@ -20,6 +20,15 @@ class User:
     _users = list()
     users_db = list()
     __connection_info = "mongodb+srv://krayushkin90:11171990@cluster0.dn7jino.mongodb.net/"
+    mongoclient = pymongo.MongoClient(__connection_info)
+    db = mongoclient.calendarwork
+    collection = db.users
+    for user in collection.find():
+        users_db.append(user)
+        _users.append(user)
+        _id_list.append(user["_id"])
+    _id = _id_list[-1]
+
 
     def __init__(self, login, user_password, name=None, job_title=None, email=None, calendars=None, _user_id=None):
         self._login = login
@@ -29,9 +38,9 @@ class User:
         self._job_title = job_title
         self._identificator = '@' + self._login
         self.__class__.__identificators.append(self._identificator)
-        self.__class__.__id = self.__class__.__id + 1
-        self._user_id = self.__class__.__id
-        self.__class__.__id_list.append(self.__class__.__id)
+        self.__class__._id = self.__class__._id + 1
+        self._user_id = self.__class__._id
+        self.__class__._id_list.append(self.__class__._id)
         self.__hash_and_salted_pass = ''
         self.gen_hashed_pass()
         self._user_dict = dict()

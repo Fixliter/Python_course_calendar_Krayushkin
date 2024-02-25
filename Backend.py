@@ -119,6 +119,7 @@ class Backend(metaclass=SingletonMeta):
         self.current_user = current_user
         self.calendar_current = None
         self.show_status("1")
+        self.message = ''
 
     @staticmethod
     def show_status(status):
@@ -238,35 +239,65 @@ class Backend(metaclass=SingletonMeta):
         Backend.show_status("27")
         return collection
 
-    def register_new_user(self):
+    def register_new_user(self, gui=False, login=None, password=None, name=None, job_title=None, email=None):
         """Создания нового экземпляра класса User с проверкой соответствующих
         полей на ввод данных, логин и пароль являются обязательными, логин проверяется на
         наличие в базе, пароль проверяется на пустое значение и наличие пробела"""
         Backend.show_status("30")
         collection = self.connection_db_users()
-        new_user = User("", "")
-        new_user.name = input("Введите имя пользователя: ")
-        new_user.job_title = input("Введите должность: ")
-        new_user.email = input("Введите email: ")
-        new_user.login = input("Введите login(латинскими): ")
+        Backend.show_status("3")
+        Backend.show_status("4")
+        # Backend.asyncload_db()
+        # self.get_users_from_db()
+        # print(User._id_list)
+        # print(User._id)
+
+        if not gui:
+            new_user = User("", "")
+            # print(User._id_list)
+            # print(new_user.user_id)
+            new_user.name = input("Введите имя пользователя: ")
+            new_user.job_title = input("Введите должность: ")
+            new_user.email = input("Введите email: ")
+            new_user.login = input("Введите login(латинскими): ")
+        else:
+            new_user = User("", "")
+            new_user.name = name
+            new_user.job_title = job_title
+            new_user.email = email
+            new_user.login = login
         is_exists = collection.count_documents({"login": new_user.login})
         if is_exists == 0:
-            print("Login is available")
+            self.message = "Login is available"
+            print(self.message)
         else:
-            print("Login is already exist, try to use another one")
+            self.message = "Login is already exist, try to use another one"
+            print(self.message)
             while collection.count_documents({"login": new_user.login}):
                 # while new_user.login in self._users.keys():
-                print(f"login {new_user.login} уже занят")
-                new_user.login = input("Введите другой login: ")
-        new_user._password = input("Введите password: ")
+                self.message = f"login {new_user.login} уже занят"
+                print(self.message)
+                if not gui:
+                    new_user.login = input("Введите другой login: ")
+                else:
+                    self.message = "Введите другой login"
+        if not gui:
+            new_user._password = input("Введите password: ")
+        else:
+            new_user._password = password
         if new_user._password is not None and " " not in new_user._password:
-            print(f"Пароль успешно принят")
+            self.message = f"Пароль успешно принят"
+            print(self.message)
             new_user.gen_hashed_pass()
         else:
             print("Пароль не введен или содержит пробел, введите пароль в виде букв, чисел и символов без пробелов")
             while new_user._password is not None and " " not in new_user._password:
-                print(f"login {new_user.login} уже занят")
-                new_user._password = input("Введите password корректно, например 'ABCdef1234@^%': ")
+                self.message = f"login {new_user.login} уже занят"
+                print(self.message)
+                if not gui:
+                    new_user._password = input("Введите password корректно, например 'ABCdef1234@^%': ")
+                else:
+                    self.message = "Введите password корректно, например 'ABCdef1234@^%'"
 
         self.__class__._users[new_user.login] = new_user.to_dict_db()
         User.users_db.append(new_user.to_dict_db())
@@ -277,6 +308,7 @@ class Backend(metaclass=SingletonMeta):
         collection.insert_one(self.__class__._users[new_user.login])
 
         Backend.show_status("31")
+        self.message = "Регистрация успешно завершена"
         return [new_user.login, new_user._password]
 
     def read_user_from_class(self, user):
@@ -499,6 +531,7 @@ class Backend(metaclass=SingletonMeta):
             for user in collection.find():
                 User.users_db.append(user)
                 User._users.append(user)
+                # User._id_list.append(user["_id"])
             print(User.users_db, "\n", User._users)  # после отладки закомменитровать
 
         async def calendars():
@@ -599,7 +632,6 @@ class Backend(metaclass=SingletonMeta):
 
         # collection = self.connection_db_events()
 
-
     @staticmethod
     def check_pass_user(login, entered_password: str):
         """Проверка соответствия пароля, смотрит в выгруженном листе users"""
@@ -615,7 +647,7 @@ class Backend(metaclass=SingletonMeta):
                 return valid
 
     @staticmethod
-    def check_pass_user_direct_in_db(login, entered_password: str):
+    def check_pass_user_direct_in_db(login: str, entered_password: str):
         """Проверка соответствия пароля, смотрит в базе напрямую"""
         user_pass = entered_password
         mongoclient = pymongo.MongoClient(Backend.__connection_info)
@@ -627,6 +659,31 @@ class Backend(metaclass=SingletonMeta):
             return valid
 
     def launch_session(self, login, password):
+        """Запуск сессии, ввод логина и пароля, поверка данных, вызов User"""
+        Backend.show_status("1")
+        Backend.show_status("2")
+        if not self.check_pass_user_direct_in_db(login, password):
+            print(f"Введеный пароль неверный для login: {login}")
+            while self.check_pass_user_direct_in_db(login, password):
+                password = input(f"Попробуйте еще раз ввести верный пароль для login {login}: ")
+        Backend.show_status("3")
+        Backend.show_status("4")
+        self.asyncload_db()
+        self.get_users_from_db()
+        for user in Backend._users_list:
+            if login == user["login"]:
+                self.launched_user = user
+                self.current_user = User(login=user["login"],
+                                         user_password=password,
+                                         name=user["name"],
+                                         job_title=user["job_title"],
+                                         email=user["email"],
+                                         calendars=user["calendars"],
+                                         _user_id=user["_id"])
+                Backend.show_status("5")
+        self.choose_calendar(self.current_user.login)
+
+    def launch_session_for_gui(self, login, password):
         """Запуск сессии, ввод логина и пароля, поверка данных, вызов User"""
         Backend.show_status("1")
         Backend.show_status("2")
@@ -668,8 +725,8 @@ class Backend(metaclass=SingletonMeta):
         # print(calendar_open_id, type(calendar_open_id))
         # print(self.current_user.get_identificator())
 
-        self.calendar_current = Calendar(self.current_user.get_identificator(),
-                                         calendar_open["name"],
+        self.calendar_current = Calendar(owner=self.current_user.get_identificator(),
+                                         name=calendar_open["name"],
                                          _id=calendar_open_id,
                                          _events=calendar_open["events"])
         Backend.show_status("7")
@@ -969,3 +1026,4 @@ if __name__ == '__main__':
 
     # Back.find_user_by_login("Dona")
     # Back.connection_db_check()
+    Back.register_new_user()
