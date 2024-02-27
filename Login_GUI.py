@@ -29,11 +29,14 @@ def main(page: ft.Page):
         page.snack_bar.visible = True
         page.snack_bar.open = True
         page.update()
-        backend.register_new_user(gui=True, login=new_user_login.current.value, password=new_user_password.current.value,
-                                  name=user_name.current.value, job_title=user_job_title.current.value,
-                                  email=user_email.current.value)
+        if backend.register_new_user(gui=True, login=new_user_login.current.value,
+                                     password=new_user_password.current.value,
+                                     name=user_name.current.value, job_title=user_job_title.current.value,
+                                     email=user_email.current.value):
+            button_reg.current.text = "Зарегистрирован"
         page.snack_bar.visible = False
         page.snack_bar.open = False
+
         page.update()
 
     def auth_user(e):
@@ -78,6 +81,13 @@ def main(page: ft.Page):
                 user_password = ""
                 button_auth.current.text = "Авторизован"
                 page.update()
+                if len(page.navigation_bar.destinations) == 2:
+                    page.navigation_bar.destinations.append(
+                        ft.NavigationDestination(icon=ft.icons.CALENDAR_MONTH_OUTLINED,
+                                                 label="Календарь",
+                                                 selected_icon=ft.icons.BALLOT_ROUNDED))
+                    page.update()
+
             else:
                 page.snack_bar = ft.SnackBar(ft.Text(f"Введены некорректные данные, авторизация не прошла"))
                 page.snack_bar.open = True
@@ -118,6 +128,7 @@ def main(page: ft.Page):
         if all([user_login.current.value, user_password.current.value]):
             button_auth.current.disabled = False
             page.update()
+
         else:
             button_auth.current.disabled = True
             page.update()
@@ -141,6 +152,9 @@ def main(page: ft.Page):
         e.control.page.reg_banner.open = False
         await e.control.page.update_async()
 
+    def choose_calendar(e):
+        pass
+
     # Для авторизации
     user_login = ft.Ref[ft.TextField]()
     user_password = ft.Ref[ft.TextField]()
@@ -154,6 +168,9 @@ def main(page: ft.Page):
     user_email = ft.Ref[ft.TextField]()
     reg_banner = ft.Ref[ft.Banner]()
     button_reg = ft.Ref[ft.OutlinedButton]()
+
+    # Для панели календаря
+    button_choose_cal = ft.Ref[ft.OutlinedButton]()
 
     panel_register = ft.Row([ft.Column([
         ft.Text("Регистрация"),
@@ -179,7 +196,15 @@ def main(page: ft.Page):
         ft.Text("Авторизация"),
         ft.TextField(ref=user_login, label="Логин", width=200, on_change=validate_auth),
         ft.TextField(ref=user_password, label="Пароль", width=200, on_change=validate_auth, password=True),
-        ft.OutlinedButton(ref=button_auth, text="Войти", width=200, on_click=auth_user, disabled=True)
+        ft.OutlinedButton(ref=button_auth, text="Войти", width=200, on_click=auth_user, disabled=False)
+    ], alignment=ft.MainAxisAlignment.CENTER
+    )
+    ]
+    )
+
+    panel_calendar = ft.Row([ft.Column([
+        ft.Text("Календарь", text_align=ft.TextAlign.CENTER),
+        ft.OutlinedButton(ref=button_choose_cal, text="Выбрать календарь", width=200, on_click=choose_calendar)
     ], alignment=ft.MainAxisAlignment.CENTER
     )
     ]
@@ -193,8 +218,12 @@ def main(page: ft.Page):
             page.add(panel_register)
             page.window_height = 600
             page.update()
-        elif index == 0:
+        if index == 0:
             page.add(panel_auth)
+            page.window_height = 400
+            page.update()
+        elif index == 2:
+            page.add(panel_calendar)
             page.window_height = 400
             page.update()
 
